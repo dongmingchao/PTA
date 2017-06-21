@@ -11,26 +11,12 @@
 #include<stdlib.h>
 #include<ctype.h>
 #include<string.h>
+//链表
 struct node {
 	int n;
 	struct node *next;
 };
-struct string {
-	char c;
-	struct string *next;
-};
-struct mtstring {
-	struct string *s;
-	struct mtstring *next;
-	struct mtstring *prior;
-};
-struct tree_str {
-	struct string *s;
-	struct tree_str *l;
-	struct tree_str *r;
-	struct tree_str *t;
-};
-void creat(struct node **list, int n) {
+void creat(struct node **list, int n) { //创建链表
 	if (*list) creat(&(*list)->next, n);
 	else {
 		*list = (struct node *)malloc(sizeof(struct node));
@@ -38,7 +24,34 @@ void creat(struct node **list, int n) {
 		(*list)->next = NULL;
 	}
 }
-void str_push(struct string **stackstr, char c) {
+struct node *joint(struct node **list, int lenth) { //合并链表数组
+	int save = lenth;
+	while (lenth > 1) {
+		struct node *i = list[save - lenth];
+		for (; i->next; i = i->next)
+			;
+		lenth--;
+		i->next = list[save - lenth];
+	}
+	return list[0];
+}
+//字符串
+struct string {
+	char c;
+	struct string *next;
+};
+void str_creat(struct string **string) { //直接输入创建字符串
+	char c = getchar();
+	if (c == '\n' || c == ' ')
+		return;
+	else {
+		*string = (struct string *) malloc(sizeof(struct string));
+		(*string)->c = c;
+		(*string)->next = NULL;
+		str_creat(&(*string)->next);
+	}
+}
+void str_push(struct string **stackstr, char c) { //压入字符栈
 	if (*stackstr) {
 		struct string *temp = (struct string *) malloc(sizeof(struct string));
 		temp->c = c;
@@ -51,7 +64,7 @@ void str_push(struct string **stackstr, char c) {
 		(*stackstr)->next = NULL;
 	}
 }
-void str_reverse(struct string **str) {
+void str_reverse(struct string **str) { //字符串转置
 	struct string *temp = NULL;
 	while (*str) {
 		str_push(&temp, (*str)->c);
@@ -59,7 +72,22 @@ void str_reverse(struct string **str) {
 	}
 	(*str) = temp;
 }
-void mtstr_push(struct mtstring **stackstr, struct string *s) {
+void str_append(struct string **string, char c) { //字符串追加
+	if (*string)
+		str_append(&(*string)->next, c);
+	else {
+		*string = (struct string *) malloc(sizeof(struct string));
+		(*string)->c = c;
+		(*string)->next = NULL;
+	}
+}
+//字符串聚合
+struct mtstring {
+	struct string *s;
+	struct mtstring *next;
+	struct mtstring *prior;
+};
+void mtstr_push(struct mtstring **stackstr, struct string *s) { //压入字符串栈
 	if (*stackstr) {
 		struct mtstring *temp = (struct mtstring *) malloc(
 			sizeof(struct mtstring));
@@ -76,7 +104,7 @@ void mtstr_push(struct mtstring **stackstr, struct string *s) {
 		(*stackstr)->prior = NULL;
 	}
 }
-void mtstr_reverse(struct mtstring **str) {
+void mtstr_reverse(struct mtstring **str) { //字符串集合转置
 	struct mtstring *temp = NULL;
 	while (*str) {
 		mtstr_push(&temp, (*str)->s);
@@ -84,24 +112,15 @@ void mtstr_reverse(struct mtstring **str) {
 	}
 	(*str) = temp;
 }
-void str_creat(struct string **string) {
-	char c = getchar();
-	if (c == '\n' || c == ' ') return;
-	else {
-		*string = (struct string *)malloc(sizeof(struct string));
-		(*string)->c = c;
-		(*string)->next = NULL;
-		str_creat(&(*string)->next);
-	}
-}
-void str_append(struct string **string, char c) {//β�������ַ��������ƶ�ָ��
-	if (*string) str_append(&(*string)->next, c);
-	else {
-		*string = (struct string *)malloc(sizeof(struct string));
-		(*string)->c = c;
-		(*string)->next = NULL;
-	}
-}
+//树
+struct tree_str {
+	struct string *s;
+	struct tree_str *l;
+	struct tree_str *r;
+	struct tree_str *t;
+};
+
+//输出
 void print(struct node *list) {
 	if (!list) return;
 	else printf("%d|", list->n);
@@ -136,7 +155,7 @@ void tree_print(struct tree_str *tree, int order) {
 		}
 	}
 }
-int type(struct string *str) { //�ж��ַ��������ֻ��Ƿ��Ż��ǹϺ�
+int type(struct string *str) { //判断字符串类型
 	if (!str)
 		return 0;
 	if (isalnum(str->c))
@@ -155,7 +174,7 @@ int type(struct string *str) { //�ж��ַ��������ֻ��Ƿ
 	}
 	return 0;
 }
-struct string *piece(struct string **str) {
+struct string *piece(struct string **str) { //将字符串中不同类型的部分切片
 	if (!*str)
 		return NULL;
 	if (type(*str) == 1) {
@@ -212,16 +231,16 @@ struct mtstring *str_analyze(struct string *str) {
 	}
 	return result;
 }
-struct mtstring *toPE(struct string *str) {
+struct mtstring *toPE(struct string *str) { //转为前缀表达式
 	str_reverse(&str);
 	return str_analyze(str);
 }
-struct mtstring *toAPF(struct string *str) {
+struct mtstring *toAPF(struct string *str) { //转为后缀表达式
 	struct mtstring *t = str_analyze(str);
 	mtstr_reverse(&t);
 	return t;
 }
-void tree_born(struct tree_str **tree, struct string *str) {
+void tree_born(struct tree_str **tree, struct string *str) { //制造树节点
 	if (!str)
 		return;
 	if (*tree) {
