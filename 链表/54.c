@@ -128,8 +128,11 @@ int main() {
 	}
 	struct node *mult_res = multiply(list[0], list[1]);
 	print(mult_res);
+	if (!mult_res)
+		printf("0");
 	struct node *add_res = add(list[0], list[1]);
-	printf("add\n");
 	print(add_res);
+	if (!add_res)
+		printf("0");
 	return 0;
 }
