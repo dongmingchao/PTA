@@ -31,10 +31,15 @@ void creat(struct node **list, int base, int index) {
 	}
 }
 void print(struct node *list) {
-	if (list) {
-		printf("base:%d", list->base);
-		printf("index:%d\n", list->index);
+	if (!list)
+		return;
+	if (list->next) {
+		printf("%d ", list->base);
+		printf("%d ", list->index);
 		print(list->next);
+	} else {
+		printf("%d ", list->base);
+		printf("%d", list->index);
 	}
 }
 void merge(struct node **list) { //合并指数相同的项
@@ -128,6 +133,7 @@ int main() {
 	}
 	struct node *mult_res = multiply(list[0], list[1]);
 	print(mult_res);
+	printf("\n");
 	if (!mult_res)
 		printf("0 ");
 	struct node *add_res = add(list[0], list[1]);
