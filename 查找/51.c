@@ -19,8 +19,90 @@
  38 45 24 58 42 12 67 51
  NO
  */
-#include"../all.h"
-
+#include<stdio.h>
+#include<stdlib.h>
+struct tree {
+	int n;
+	struct tree *l;
+	struct tree *r;
+};
+struct node_tree {
+	struct node_tree *next;
+	struct tree *t;
+};
+void node_tree_create(struct node_tree **list, struct tree *root) { //建一个树节点队列
+	if (*list)
+		node_tree_create(&(*list)->next, root);
+	else {
+		*list = (struct node_tree *) malloc(sizeof(struct node_tree));
+		(*list)->next = NULL;
+		(*list)->t = root;
+	}
+}
+void tree_search_insert(struct tree **root, int n) {
+	if (!*root) {
+		*root = (struct tree *) malloc(sizeof(struct tree));
+		(*root)->n = n;
+		(*root)->l = NULL;
+		(*root)->r = NULL;
+	} else {
+		if ((*root)->n > n)
+			tree_search_insert(&(*root)->r, n);
+		else
+			tree_search_insert(&(*root)->l, n);
+	}
+}
+struct node_tree *tree_level(struct tree *root) { //层次遍历
+	if (!root)
+		return NULL;
+	struct node_tree *list = NULL;
+	struct node_tree *result = NULL;
+	do {
+		node_tree_create(&result, root);
+		if (root->l)
+			node_tree_create(&list, root->l);
+		if (root->r)
+			node_tree_create(&list, root->r);
+		if (list->next) {
+			root = list->t;
+			list = list->next;
+		} else {
+			node_tree_create(&result, list->t);
+			return result;
+		}
+	} while (list);
+	return NULL;
+}
+void node_tree_print(struct node_tree *list) {
+	while (list) {
+		if (!list->next) {
+			printf("%d", list->t->n);
+			return;
+		}
+		printf("%d|", list->t->n);
+		list = list->next;
+	}
+}
+int isbalance(struct node_tree *list) {
+	int leastisleaf = 0;
+	while (list) {
+		if (list->t->l && list->t->r) {
+			if (leastisleaf)
+				return 0;
+			list = list->next;
+		} else if (list->t->l) {
+			if (leastisleaf)
+				return 0;
+			list = list->next;
+		} else if (list->t->r) {
+			return 0;
+		} else {
+			leastisleaf = 1;
+			list = list->next;
+		}
+	}
+	return 1;
+}
 int main() {
 	struct tree *atree = NULL;
 	int N;
@@ -30,9 +112,11 @@ int main() {
 		scanf("%d", &n);
 		tree_search_insert(&atree, n);
 	}
-	tree_levelprint(atree);
-	puts("\n");
-	struct node *list = tree_print(atree, 2);
-	print(list);
+	struct node_tree *list = tree_level(atree);
+	node_tree_print(list);
+	if (isbalance(list))
+		printf("\nYES");
+	else
+		printf("\nNO");
 	return 0;
 }

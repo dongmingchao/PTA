@@ -184,12 +184,13 @@ void node_tree_create(struct node_tree **list, struct tree *root) { //建一个�
 		(*list)->t = root;
 	}
 }
-void tree_levelprint(struct tree *root) { //层次遍历
+struct node_tree *tree_level(struct tree *root) { //层次遍历
 	if (!root)
-		return;
+		return NULL;
 	struct node_tree *list = NULL;
+	struct node_tree *result = NULL;
 	do {
-		printf("%d|", root->n);
+		node_tree_create(&result, root);
 		if (root->l)
 			node_tree_create(&list, root->l);
 		if (root->r)
@@ -198,10 +199,21 @@ void tree_levelprint(struct tree *root) { //层次遍历
 			root = list->t;
 			list = list->next;
 		} else {
+			node_tree_create(&result, list->t);
+			return result;
+		}
+	} while (list);
+	return NULL;
+}
+void node_tree_print(struct node_tree *list) {
+	while (list) {
+		if (!list->next) {
 			printf("%d", list->t->n);
 			return;
 		}
-	} while (list);
+		printf("%d|", list->t->n);
+		list = list->next;
+	}
 }
 //字符串树
 struct tree_str {
