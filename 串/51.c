@@ -9,37 +9,32 @@
  输出样例:
  5 5
  */
-#include "../all.h"
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<ctype.h>
-/*struct node {
+struct str {
 	char c;
-	struct node *next;
- };
- void create(struct node **list) {
+	struct str *next;
+};
+void create(struct str **list) {
 	char ch = getchar();
 	if (ch == '\n')
 		return;
 	else {
-		*list = (struct node *) malloc(sizeof(struct node));
+		*list = (struct str *) malloc(sizeof(struct str));
 		(*list)->c = ch;
 		(*list)->next = NULL;
- create(&(*list)->next);
+		create(&(*list)->next);
 	}
- }*/
+}
 int main() {
-	struct string *str = NULL;
-	char ch;
-	ch = (char) getchar();
-	while (ch != '\n') {
-		str_create(&str, ch);
-		ch = (char) getchar();
-	}
+	struct str *str = NULL;
+	create(&str);
 	int locate = 0, lenth = 0;
 	int finlocate = 0, finlenth = 0;
 	while (str) {
-		if (isdigit(str->c)) {
+		if (str->c > '0' && str->c < '9') {
 			lenth++;
 		} else {
 			if (lenth > finlenth) {
@@ -49,6 +44,7 @@ int main() {
 			lenth = 0;
 		}
 		locate++;
+		str = str->next;
 	}
 	printf("%d %d", finlocate, finlenth);
 	return 0;
