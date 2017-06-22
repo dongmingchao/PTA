@@ -17,7 +17,7 @@ struct node {
 	int n;
 	struct node *next;
 };
-void creat(struct node **list) {
+void create(struct node **list) {
 	int n;
 	scanf("%d", &n);
 	if (n == -1)
@@ -26,7 +26,7 @@ void creat(struct node **list) {
 		*list = (struct node *) malloc(sizeof(struct node));
 		(*list)->n = n;
 		(*list)->next = NULL;
-		creat(&(*list)->next);
+		create(&(*list)->next);
 	}
 }
 void sort(struct node **list) {
@@ -68,8 +68,8 @@ struct node *joint(struct node **list, int lenth) {
 }
 int main() {
 	struct node *list[2] = { NULL };
-	creat(&list[0]);
-	creat(&list[1]);
+	create(&list[0]);
+	create(&list[1]);
 	list[0] = joint(list, 2);
 	sort(&list[0]);
 	print(list[0]);

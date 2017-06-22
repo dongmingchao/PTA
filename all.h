@@ -16,12 +16,38 @@ struct node {
 	int n;
 	struct node *next;
 };
-void creat(struct node **list, int n) { //创建链表
-	if (*list) creat(&(*list)->next, n);
+void insert(struct node **list, int n) { //队列的插入【指针会移动到队尾】怎么说呢，感觉有点废
+	struct node *p = (struct node *) malloc(sizeof(struct node));
+	p->n = n;
+	p->next = NULL;
+	if (!*list)
+		*list = p;
 	else {
-		*list = (struct node *)malloc(sizeof(struct node));
-		(*list)->n = n;
-		(*list)->next = NULL;
+		(*list)->next = p;
+		*list = p;
+	}
+}
+void print(struct node *list) {
+	if (!list)
+		return;
+	else if (!list->next) {
+		printf("%d", list->n);
+		return;
+	} else
+		printf("%d|", list->n);
+	print(list->next);
+}
+void create(struct node **list, int n) { //创建链表
+	struct node *p = (struct node *) malloc(sizeof(struct node));
+	p->n = n;
+	p->next = NULL;
+	if (!*list)
+		*list = p;
+	else {
+		struct node *copy = *list;
+		while (copy->next)
+			copy = copy->next;
+		copy->next = p;
 	}
 }
 struct node *joint(struct node **list, int lenth) { //合并链表数组
@@ -40,7 +66,7 @@ struct string {
 	char c;
 	struct string *next;
 };
-void str_creat(struct string **string) { //直接输入创建字符串
+void str_create(struct string **string) { //直接输入创建字符串
 	char c = getchar();
 	if (c == '\n' || c == ' ')
 		return;
@@ -48,7 +74,7 @@ void str_creat(struct string **string) { //直接输入创建字符串
 		*string = (struct string *) malloc(sizeof(struct string));
 		(*string)->c = c;
 		(*string)->next = NULL;
-		str_creat(&(*string)->next);
+		str_create(&(*string)->next);
 	}
 }
 void str_push(struct string **stackstr, char c) { //压入字符栈
@@ -113,6 +139,71 @@ void mtstr_reverse(struct mtstring **str) { //字符串集合转置
 	(*str) = temp;
 }
 //树
+//搜索二叉树
+struct tree {
+	int n;
+	struct tree *l;
+	struct tree *r;
+};
+void tree_search_insert(struct tree **root, int n) {
+	if (!*root) {
+		*root = (struct tree *) malloc(sizeof(struct tree));
+		(*root)->n = n;
+		(*root)->l = NULL;
+		(*root)->r = NULL;
+	} else {
+		if ((*root)->n > n)
+			tree_search_insert(&(*root)->r, n);
+		else
+			tree_search_insert(&(*root)->l, n);
+	}
+}
+//树节点链表
+struct node_tree {
+	struct node_tree *next;
+	struct tree *t;
+};
+void node_tree_push(struct node_tree **list, struct tree *root) {
+	if (*list) {
+		struct node_tree *p = (struct node_tree *) malloc(sizeof(struct node_tree));
+		p->next = *list;
+		p->t = root;
+		*list = p;
+	} else {
+		*list = (struct node_tree *) malloc(sizeof(struct node_tree));
+		(*list)->next = NULL;
+		(*list)->t = root;
+	}
+}
+void node_tree_create(struct node_tree **list, struct tree *root) { //建一个树节点队列
+	if (*list)
+		node_tree_create(&(*list)->next, root);
+	else {
+		*list = (struct node_tree *) malloc(sizeof(struct node_tree));
+		(*list)->next = NULL;
+		(*list)->t = root;
+	}
+}
+void tree_levelprint(struct tree *root) { //层次遍历
+	if (!root)
+		return;
+	struct node_tree *list = NULL;
+	do {
+		printf("%d|", root->n);
+		if (root->l)
+			node_tree_create(&list, root->l);
+		if (root->r)
+			node_tree_create(&list, root->r);
+		if (list->next) {
+			root = list->t;
+			list = list->next;
+		} else {
+			printf("%d", list->t->n);
+			return;
+		}
+	} while (list);
+}
+//字符串树
 struct tree_str {
 	struct string *s;
 	struct tree_str *l;
@@ -121,35 +212,55 @@ struct tree_str {
 };
 
 //输出
-void print(struct node *list) {
-	if (!list) return;
-	else printf("%d|", list->n);
-	print(list->next);
-}
 void str_print(struct string *str) {
 	if (!str)
 		return;
 	else printf("%c", str->c);
 	str_print(str->next);
 }
-void tree_print(struct tree_str *tree, int order) {
-	printf("tree print\n");
-	if (!tree) return;
+struct node *tree_print(struct tree *tree, int order) { //改变order的值：1前序遍历，2中序遍历，3后序遍历
+	if (!tree)
+		return NULL;
+	else {
+		static struct node *head = NULL;
+		switch (order) {
+		case 1:
+			create(&head, tree->n);
+			tree_print(tree->l, order);
+			tree_print(tree->r, order);
+			return head;
+		case 2:
+			tree_print(tree->l, order);
+			create(&head, tree->n);
+			tree_print(tree->r, order);
+			return head;
+		case 3:
+			tree_print(tree->l, order);
+			tree_print(tree->r, order);
+			create(&head, tree->n);
+			return head;
+		}
+	}
+	return NULL;
+}
+void tree_str_print(struct tree_str *tree, int order) {
+	if (!tree)
+		return;
 	else {
 		switch (order) {
 		case 1:
 			str_print(tree->s);
-			tree_print(tree->l, order);
-			tree_print(tree->r, order);
+			tree_str_print(tree->l, order);
+			tree_str_print(tree->r, order);
 			return;
 		case 2:
-			tree_print(tree->l, order);
+			tree_str_print(tree->l, order);
 			str_print(tree->s);
-			tree_print(tree->r, order);
+			tree_str_print(tree->r, order);
 			return;
 		case 3:
-			tree_print(tree->l, order);
-			tree_print(tree->r, order);
+			tree_str_print(tree->l, order);
+			tree_str_print(tree->r, order);
 			str_print(tree->s);
 			return;
 		}
@@ -204,9 +315,9 @@ struct string *piece(struct string **str) { //将字符串中不同类型的部�
 }
 struct mtstring *str_analyze(struct string *str) {
 	struct mtstring *result = NULL;
-	struct string *symbol = NULL; //�½�����ջ
+	struct string *symbol = NULL; //符号栈
 	do {
-		struct string *temp = piece(&str); //�ַ�������
+		struct string *temp = piece(&str); //字符串取片
 		if (type(temp) == 1)
 			mtstr_push(&result, temp);
 		else if (type(temp) > type(symbol))
