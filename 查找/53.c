@@ -13,3 +13,23 @@
 4 0 1 3
  */
 #include<stdio.h>
+int main() {
+	int N, P, in[1000] = { 0 }, locate[1000] = { 0 };
+	scanf("%d%d", &N, &P);
+	for (int i = 0; i < N; i++) {
+		int n;
+		scanf("%d", &n);
+		int location = n % P;
+		while (in[location]) {
+			location++;
+			location %= P;
+		}
+		in[location] = n;
+		locate[i] = location;
+	}
+	for (int i = 0; i < N - 1; i++) {
+		printf("%d ", locate[i]);
+	}
+	printf("%d", locate[N - 1]);
+	return 0;
+}
