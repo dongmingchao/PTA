@@ -66,15 +66,17 @@ struct string {
 	char c;
 	struct string *next;
 };
-void str_create(struct string **string) { //直接输入创建字符串
-	char c = getchar();
-	if (c == '\n' || c == ' ')
-		return;
+void str_create(struct string **string, char ch) { //创建字符串
+	struct string *p = (struct string *) malloc(sizeof(struct string));
+	p->c = ch;
+	p->next = NULL;
+	if (!*string)
+		*string = p;
 	else {
-		*string = (struct string *) malloc(sizeof(struct string));
-		(*string)->c = c;
-		(*string)->next = NULL;
-		str_create(&(*string)->next);
+		struct string *copy = *string;
+		while (copy->next)
+			copy = copy->next;
+		copy->next = p;
 	}
 }
 void str_push(struct string **stackstr, char c) { //压入字符栈
